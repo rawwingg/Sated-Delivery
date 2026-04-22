@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a90768ff86d148b8be216654bd325cb, type: 3}
+  m_Name: Car
+  m_EditorClassIdentifier: 
+  vehicleName: Car
+  description: 
+  icon: {fileID: 21300000, guid: 18348a72451194af08300d139fb29f87, type: 3}
+  vehiclePrefab: {fileID: 5600738816234043202, guid: cd3d9b67657504c5e9ff22ac5aabb37c, type: 3}
+  speed: 7
+  capacity: 6
+  ecoScore: 3
+  safety: 6

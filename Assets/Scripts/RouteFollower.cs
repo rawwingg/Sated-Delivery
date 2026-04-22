@@ -1,12 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 
-// ─────────────────────────────────────────────────────────────
-//  RouteFollower
-//  Moves an object from Start → End → Start, then stops.
-//  Drop on the object you want to move.
-//  Assign the RouteVisualizer from your scene in the Inspector.
-// ─────────────────────────────────────────────────────────────
 public class RouteFollower : MonoBehaviour
 {
     [Header("Route")]
@@ -14,13 +7,15 @@ public class RouteFollower : MonoBehaviour
 
     [Header("Movement")]
     public float Speed = 5f;
-    [Tooltip("How close to a waypoint before moving to the next one")]
     public float WaypointThreshold = 0.2f;
     public bool MoveOnStart = true;
 
     [Header("Rotation")]
     public bool FaceDirection = true;
     public float RotationSpeed = 8f;
+
+    [Header("Height")]
+    public float HeightOffset = 0.25f;
 
     private Vector3[] _corners;
     private int _currentIndex;
@@ -29,16 +24,17 @@ public class RouteFollower : MonoBehaviour
 
     void Start()
     {
-        if (MoveOnStart) StartMoving();
+        if (MoveOnStart)
+            StartMoving();
     }
 
     void Update()
     {
-        if (!_isMoving || _corners == null || _corners.Length == 0) return;
+        if (!_isMoving || _corners == null || _corners.Length == 0)
+            return;
+
         MoveAlongPath();
     }
-
-    // ── Public API ────────────────────────────────────────────
 
     public void StartMoving()
     {
@@ -52,28 +48,36 @@ public class RouteFollower : MonoBehaviour
 
         if (_corners == null || _corners.Length < 2)
         {
-            Debug.LogWarning("[RouteFollower] Path has fewer than 2 points. " +
-                             "Make sure RouteVisualizer has called ShowRoute() first.");
+            Debug.LogWarning("[RouteFollower] Path has fewer than 2 points. Make sure Mission.ShowRoute() ran first.");
             return;
         }
 
-        transform.position = _corners[0];
+        transform.position = _corners[0] + Vector3.up * HeightOffset;
         _currentIndex = 1;
         _movingForward = true;
         _isMoving = true;
     }
 
-    public void StopMoving() { _isMoving = false; }
-    public void ToggleMoving() { if (_isMoving) StopMoving(); else StartMoving(); }
+    public void StopMoving()
+    {
+        _isMoving = false;
+    }
 
-    // ── Internal ──────────────────────────────────────────────
+    public void ToggleMoving()
+    {
+        if (_isMoving) StopMoving();
+        else StartMoving();
+    }
 
     void MoveAlongPath()
     {
-        Vector3 target = _corners[_currentIndex];
+        Vector3 target = _corners[_currentIndex] + Vector3.up * HeightOffset;
 
         transform.position = Vector3.MoveTowards(
-            transform.position, target, Speed * Time.deltaTime);
+            transform.position,
+            target,
+            Speed * Time.deltaTime
+        );
 
         if (FaceDirection)
         {
@@ -82,7 +86,10 @@ public class RouteFollower : MonoBehaviour
             {
                 Quaternion targetRot = Quaternion.LookRotation(dir);
                 transform.rotation = Quaternion.Slerp(
-                    transform.rotation, targetRot, RotationSpeed * Time.deltaTime);
+                    transform.rotation,
+                    targetRot,
+                    RotationSpeed * Time.deltaTime
+                );
             }
         }
 
@@ -96,7 +103,6 @@ public class RouteFollower : MonoBehaviour
                 }
                 else
                 {
-                    // Reached the end — reverse back to start
                     _movingForward = false;
                     _currentIndex = _corners.Length - 2;
                 }
@@ -109,8 +115,16 @@ public class RouteFollower : MonoBehaviour
                 }
                 else
                 {
-                    // Back at start — stop
                     _isMoving = false;
+
+                    if (Visualizer != null)
+                    {
+                        Visualizer.ClearRoute();
+                        Destroy(Visualizer.gameObject);
+                    }
+
+                    Destroy(gameObject);
+
                     Debug.Log("[RouteFollower] Round trip complete.");
                 }
             }
